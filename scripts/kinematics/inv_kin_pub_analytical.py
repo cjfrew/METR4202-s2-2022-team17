@@ -45,20 +45,23 @@ def inverse_kinematics(pose: Pose) -> JointState:
     L2 = 117
     L3 = 95
     L4 = 115
-
-    phi = np.pi
-
-    theta1 = -np.arctan(x/y)
-    Pz = z - L1
-    Py = np.sqrt(x**2+y**2)
-    Wz = Pz-L4*np.cos(phi)
-    Wy = Py-L4*np.sin(phi)
-    c2 = (Wz**2+Wy**2-L2**2-L3**2)/(2*L2*L3)
-    theta3 = np.arccos(c2)
-    theta2 = np.arctan(Wy/Wz)-np.arctan((L3*np.sin(theta3))/(L2+L3*np.cos(theta3)))
-    theta4 = phi-theta2-theta3
-    ang = np.array([theta1,theta2,theta3,theta4])
-    
+    # XYZ limits
+    mx_length=L2+L3+L4
+    if np.sqrt(x**2+y**2)>mx_length
+    	ang = np.array([theta1,theta2,theta3,theta4])
+    else
+        phi = np.pi
+	theta1 = -np.arctan(x/y)
+    	Pz = z - L1
+    	Py = np.sqrt(x**2+y**2)
+    	Wz = Pz-L4*np.cos(phi)
+    	Wy = Py-L4*np.sin(phi)
+	c2 = (Wz**2+Wy**2-L2**2-L3**2)/(2*L2*L3)
+	theta3 = np.arccos(c2)
+	theta2 = np.arctan(Wy/Wz)-np.arctan((L3*np.sin(theta3))/(L2+L3*np.cos(theta3)))
+	theta4 = phi-theta2-theta3
+	ang = np.array([theta1,theta2,theta3,theta4])
+	    
 
     # Create message of type JointState
     msg = JointState(
