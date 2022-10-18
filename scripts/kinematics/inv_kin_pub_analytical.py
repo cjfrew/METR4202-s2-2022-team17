@@ -62,7 +62,15 @@ def inverse_kinematics(pose: Pose) -> JointState:
 	theta4 = phi-theta2-theta3
 	ang = np.array([theta1,theta2,theta3,theta4])
 	    
-
+    b=0
+    for a in ang
+	while a>np.pi
+		a=a-2*np.pi
+	while a<=-np.pi
+		a=a+2*np.pi
+	ang[b]=a
+	b=b+1
+	
     # Create message of type JointState
     msg = JointState(
         # Set header with current time
