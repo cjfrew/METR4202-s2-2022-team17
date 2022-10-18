@@ -1,4 +1,5 @@
 import math
+from pyexpat.errors import XML_ERROR_UNDECLARING_PREFIX
 
 import numpy as np
 import numpy as np
@@ -26,7 +27,17 @@ def euler_from_quaternion(x, y, z, w):
         L=20 #length of cube
         R = np.array([[np.cos(yaw_z), -np.sin(yaw_z), 0],[np.sin(yaw_z), np.cos(yaw_z), 0],[0, 0, 1,]]) 
         Pb=np.array([[20],[0],[0]])
-        Ps=np.dot(R,Pb)
+        Ps=np.dot(R,Pb) #position of center of cube referenced to its corner
+        #Cube position referenced to camera
+        xcc=100 #x position get from camera
+        ycc=100 #y position get from camera
+        #camera position referenced to base
+        xbc=100 #x position get from camera
+        ybc=100 #y position get from camera
         
+        #get center of cube referenced to base
+
+        xbct=Ps[0]+xcc+xbc
+        ybct=Ps[1]+ycc+ybc
      
         return roll_x, pitch_y, yaw_z # in radians
