@@ -19,40 +19,60 @@ def inverse_kinematics(pose: Pose) -> JointState:
     y = pose.position.y
     z = pose.position.z
 
+    if y==0:
+        y=1*10**(-10)
+
+
     # Length of 4R robots
     L1 = 55
     L2 = 117
     L3 = 95
-    L4 = 115
+    L4 = 70+36  #115
 
     mx_length=L2+L3+L4 # Max Length of arm
     #Quadrants
-    if np.sqrt(x**2+y**2)>mx_length/2:
-        phi=-np.pi/2
+    if np.sqrt(x**2+y**2)>200:
+        phi=np.pi/2
     else: 
         phi=np.pi
+
+    # Flip bhind if need
+    dir=1
+    if y<0:
+        dir=-1
 
     # XYZ limits
     if np.sqrt(x**2+y**2)>mx_length:
         ang = np.array([0,0,0,0])
         
     else:
-        theta1 = -np.arctan(x/y)
+        theta1 = -np.arctan2(x,y)
         Pz = z - L1
         Py = np.sqrt(x**2+y**2)
         Wz = Pz-L4*np.cos(phi)
         Wy = Py-L4*np.sin(phi)
         c2 = (Wz**2+Wy**2-L2**2-L3**2)/(2*L2*L3)
         theta3 = np.arccos(c2)
-        theta2 = np.arctan(Wy/Wz)-np.arctan((L3*np.sin(theta3))/(L2+L3*np.cos(theta3)))
+        #theta2 = np.arctan(Wy/Wz)-np.arctan((L3*np.sin(theta3))/(L2+L3*np.cos(theta3)))
+        theta2 = np.arctan2(Wy,Wz)-np.arctan2((L3*np.sin(theta3)),(L2+L3*np.cos(theta3)))
+        if theta2<0:
+            theta2 = theta2+np.pi
         theta4 = phi-theta2-theta3
-        ang = np.array([theta1,theta2,theta3,theta4])
-            
+        ang = np.array([theta1,-theta2,-theta3,theta4])
+        
+        if theta2>2 or theta2<-2:
+            ang = np.array([0,0,0,0])
+        if theta3>2.2 or theta3<-2.2:
+            ang = np.array([0,0,0,0])
+        if theta4>2.2 or theta4<-2.2:
+            ang = np.array([0,0,0,0])
+
+           
     b=0
     for a in ang:
         while a>np.pi:
             a=a-2*np.pi
-            
+                
         while a<=-np.pi:
             a=a+2*np.pi
         

@@ -40,4 +40,4 @@ def euler_from_quaternion(x, y, z, w):
         xbct=Ps[0]+xcc+xbc
         ybct=Ps[1]+ycc+ybc
      
-        return roll_x, pitch_y, yaw_z # in radians
+        return xbct, ybct # in radians
