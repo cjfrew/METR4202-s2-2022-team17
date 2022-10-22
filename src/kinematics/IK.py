@@ -16,10 +16,10 @@ L5 = 15
 M = np.array([[1, 0, 0, 0],[0, 1, 0, -L5],[0, 0, 1, L1+L2+L3+L4],[0, 0, 0, 1]]) #Robot in vertical position
 N = 4 # define # joints
 #Newton-Raphson conditions
-Ew = 0.001  # Error rotation
-Ev = 0.1   # error position
+Ew = 0.001  # Error rotation in rads
+Ev = 1   # error position in mm
 mx_it=10 #define max iterations
-theta = np.array([0,0,0,0]) #Initial guest
+theta = np.array([0.1,0.1,0.1,0.1]) #Initial guess in rads
 #Create Slist
 w = np.array([[0, 0, 1], [1, 0, 0], [1, 0, 0], [1, 0, 0]])
 w = np.transpose(w)
@@ -55,8 +55,10 @@ while error_w>Ew or error_v>Ev and i<mx_it: #stop iterations if errors are less 
     error_v=np.linalg.norm(Vs[3:6]) #get new position error
     i=i+1 #count number of iterations
 
-print(theta) # publish angles from own IK function
-print(theta_l)# publish angle from ModernRobotics IK function
+def IKinSpace(S_M, M, Tsd, Ew, Ev):
+    print(theta) # publish angles from own IK function
+    print(theta_l)# publish angle from ModernRobotics IK function
+
 
 #Publish once IK angles
 pub=rospy.Publisher('ThetaIK',Float64MultiArray, queue_size=10)
