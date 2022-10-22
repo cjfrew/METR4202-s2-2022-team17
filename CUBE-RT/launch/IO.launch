@@ -1,0 +1,35 @@
+<launch>
+    <!-- BASH -->
+    <node name="bash_init" pkg="CUBE-RT" type="bash_init" output="screen"/>
+
+
+    <!-- MOTOR SETUP -->
+
+    <!-- Dynamixel Controller -->
+    <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
+
+
+    <!-- CAMERA SETUP -->
+
+    <!-- Image -->
+    <node name="ximea_demo" pkg="ximea_ros" type="ximea_demo" output="screen"/>
+
+    <!-- Aruco Position-->
+    <include file="$(find ximea_ros)/launch/ximea_aruco.launch">
+        <arg name="serial" value="32702151"/>
+    </include>
+
+
+    <!-- rgb -->
+    <node name="example_camera" pkg="ximea_color" type="example_camera.py" output="screen"/>
+
+    <!-- Colour -->
+    <node name="ximea_color_detect" pkg="ximea_color" type="ximea_color_detect" output="screen"/>
+
+
+    <!-- OUR NODES -->
+
+    <!-- Gripper -->
+    <node name="Gripper" pkg="CUBE-RT" type="Gripper_SNODE.py" output="screen"/>
+
+</launch>
