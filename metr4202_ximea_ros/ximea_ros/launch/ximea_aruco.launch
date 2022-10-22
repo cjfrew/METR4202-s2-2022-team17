@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="serial" default="32702151"/>
+    <include file="$(find aruco_detect)/launch/aruco_detect.launch">
+        <arg name="camera" value="/ximea_ros/ximea_$(arg serial)"/>
+        <arg name="fiducial_len" value="0.028"/>
+        <arg name="image" value="/image_raw"/>
+        <arg name="dictionary" value="0"/>
+    </include>
+</launch>

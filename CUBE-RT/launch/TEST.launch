@@ -1,0 +1,9 @@
+<launch>
+
+    <!-- TESTING -->
+    <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view"/>
+    <?ignore
+    <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph"/>
+    ?>
+
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+	<node name="dynamixel_interface" pkg="dynamixel_interface" type="dynamixel_interface_controller_node">
+		<rosparam command="load" file="$(find dynamixel_interface)/config/controller_config.yaml" />
+	</node>
+
+	<node name="dynamixel_slider" pkg="dynamixel_slider" type="slider_publisher" output="screen" args="$(find dynamixel_slider)/config/dynamixel.yaml">
+	</node>
+</launch>

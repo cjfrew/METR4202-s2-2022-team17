@@ -1,0 +1,53 @@
+#  This file is used to configure the paramters used to control the servos.
+#  This is an example only. To use the controller define a new controller_config.yaml
+#  in your ros package along with a new launch file and use those. see the readme for
+#  more info.
+
+# # --------------------------------------------------------------------------- # #
+# GLOBAL OPERATION PARAMETERS
+loop_rate: 100                    # desired rate for joint state updates. actual rate may be less depending on number
+                                  # of dynamixels connected and port baud rate.
+control_mode: position            # control mode, either 'position', 'velocity', or 'effort'
+disable_torque_on_shutdown: true  # with this enabled the motors will switch off when the controller closes
+ignore_input_velocity: true      # ignore input velocity commands in position mode (no profile velocity)
+diagnostics_rate: 1               # rate to publish diagnostic information
+dataport_rate: 1                  # rate to read from dynamixel external dataports
+recv_queue_size: 1                # receive queue size for desired_joint_states topic
+# The below values are used as global defaults and are applied for each servo unless overridden in the entry for
+# the servo below
+global_max_vel: 1              # maximum joint speed (rad/s) (in position or velocity control)
+global_torque_limit: 1.0          # maximum motor torque for all modes, given as a fraction of rated max (0-1)
+
+# # --------------------------------------------------------------------------- # #
+# PORT AND SERVO CONFIGURATIONS
+ports:
+
+  # PORT LIST
+  - name: Port_1               # name for this port in config
+    device: /dev/ttyUSB0       # serial device this port will communicate on
+    baudrate: 1000000          # baudrate in use
+    use_legacy_protocol: true  # wether to use new 2.0 protocol (false) or legacy 1.0 protocol (true)
+    group_read_enabled: false  # specify whether to use group comms for reading
+    group_write_enabled: false # specify whether to use group comms for writing
+    servos:
+      # SERVO LIST FOR THIS PORT
+      - id: 1                  # (ID set in servo eeprom, must be unique on this port)
+        joint_name: joint_1    # (MUST BE UNIQUE ACROSS ALL PORTS)
+        zero_pos: 512          # 0 rad servo position (in raw encoder count)
+        min_pos: 0             # minimum servo position (in raw encoder count)
+        max_pos: 1023          # maximum servo position, Note when MIN > MAX ROTATION IS REVERSED
+      - id: 2
+        joint_name: joint_2
+        zero_pos: 512
+        min_pos: 0
+        max_pos: 1023
+      - id: 3
+        joint_name: joint_3
+        zero_pos: 512
+        min_pos: 0
+        max_pos: 1023
+      - id: 4
+        joint_name: joint_4
+        zero_pos: 512
+        min_pos: 0
+        max_pos: 1023
