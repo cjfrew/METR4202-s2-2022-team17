@@ -30,7 +30,7 @@ VS code: Development environment.
 
 ## Install:
 
-To get this code you can either use [git](https://git-scm.com/downloads) to clone the repo or [download](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). It is highly recommended to use git as to increase in debugging and rising of bugs or issues,
+To get this code you can either use [git](https://git-scm.com/downloads) to [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the repo or download. It is highly recommended to use git as to increase in debugging and rising of bugs or issues,
 
 ## Code breakdown
 
@@ -38,12 +38,12 @@ The code is broken down such that the code database is modular; allowing for new
 
 REDO WITH WHAT SUBSCRIBES AND WHAT OUTPUTS
 
+The main set of code lies within the ```METR4202-s2-2022-team17/CUBE-RT/scripts``` folder. The following is a breakdown of the subscribers and publishers
+
 ## Utilisation / Launching the Robot
 1. Run the terminal
-2. Using the computer's terminal, 
-3. Enter into the *catkin_ws* workspace and use *roslaunch* 
-4. Enter 
-5.  
-
-
-
+2. Enter into the *catkin_ws* workspace
+3. Run ``` sudo killall pigpiod \n sudo pigpiod``` to activate the servo
+4. Run ``` echo 0 \n sudo tee/sys/module/usbcore/parameters/usbfs_memory_mb``` to run the camera 
+5. Select the required test from constants.py by changing ```TASK_NUMBER = 4```
+6. Run ``` roslaunch CUBE-RT DEMO.launch``` to run the testing system 
