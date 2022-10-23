@@ -45,5 +45,5 @@ The main set of code lies within the ```METR4202-s2-2022-team17/CUBE-RT/scripts`
 2. Enter into the *catkin_ws* workspace
 3. Run ``` sudo killall pigpiod \n sudo pigpiod``` to activate the servo
 4. Run ``` echo 0 \n sudo tee/sys/module/usbcore/parameters/usbfs_memory_mb``` to run the camera 
-5. Select the required test from constants.py by changing ```TASK_NUMBER = 4```
+5. Select the required test from constants.py by changing ```TASK_NUMBER```
 6. Run ``` roslaunch CUBE-RT DEMO.launch``` to run the testing system 
