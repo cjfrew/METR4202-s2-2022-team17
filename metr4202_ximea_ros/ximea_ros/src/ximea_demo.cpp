@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
 	sub_rgb = nh_rgb.subscribe("/ximea_ros/show_rgb", 1000, toggle_callback);
 
 	bool rgb_flag = rgb_toggle;
+	int i = 1;
 	while (ros::ok()) {
 		for (std::string serial : serials) {
 
@@ -79,9 +80,15 @@ int main(int argc, char** argv) {
 				cam[serial]->SetGain(ximea_ros.gain);
 			}
 			
-			if (c == ' ' ) {
+			if (c == ' ') {
 				rgb_toggle = !rgb_toggle;
 			}
+
+			if (i==1) {
+				rgb_toggle = !rgb_toggle;
+				i=0;
+			}
+			
 			if (rgb_flag != rgb_toggle) {
 				rgb_flag = rgb_toggle;
 				if (!rgb_toggle) {

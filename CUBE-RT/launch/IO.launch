@@ -30,6 +30,6 @@
     <!-- OUR NODES -->
 
     <!-- Gripper -->
-    <node name="Gripper" pkg="CUBE-RT" type="Gripper_SNODE.py" output="screen"/>
+    <node name="Gripper" pkg="CUBE-RT" type="gripper_service.py" output="screen"/>
 
 </launch>

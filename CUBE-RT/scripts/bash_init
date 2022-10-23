@@ -1,15 +1,10 @@
 #!/bin/bash
 
-
-# INITIALISATION
 # gripper
+sudo killall pigpiod
 sudo pigpiod
 
 # camera
 echo 0 | sudo tee /sys/module/usbcore/parameters/usbfs_memory_mb
-
-# RUN
-#rosrun ximea_color example_camera.py
-#rosrun ximea_color ximea_color_detect
 
 exit 0

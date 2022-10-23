@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- In/Out -->
+    <include file="$(find CUBE-RT)/launch/IO.launch"/>
+
+    <!-- StateMachine -->
+    <node name="state_machine" pkg="CUBE-RT" type="state_machine.py" output="screen"/>
+
+    <!-- Testers -->
+    <include file="$(find CUBE-RT)/launch/DEBUGGER.launch"/>
+
+</launch>
