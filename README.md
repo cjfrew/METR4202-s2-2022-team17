@@ -36,21 +36,7 @@ To get this code you can either use [git](https://git-scm.com/downloads) to clon
 
 The code is broken down such that the code database is modular; allowing for new functionality to be added and old functionality to be removed with (_*hopefully*_) no issues. This breakdown of general code can be seen below 
 
-1. CUBE-RT 
-    1. Launch
-        1. IO.launch
-        2. TASK1.launch
-        3. TASK2.launch
-        4. TEST.launch
-    2. scripts
-        1. Gripper_SNODE.py
-        2. bash_init
-        3. constants.py
-        4. helpers.py
-        5. task1.py
-    3. CMakeList.txt
-    4. README.md
-    5. Package.xml
+REDO WITH WHAT SUBSCRIBES AND WHAT OUTPUTS
 
 ## Utilisation / Launching the Robot
 1. Run the terminal
