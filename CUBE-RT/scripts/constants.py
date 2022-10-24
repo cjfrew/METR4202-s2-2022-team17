@@ -1,12 +1,18 @@
-# CONSTANTS
+#############################
+## CONSTANTS ################
+#############################
 
-TASK_NUMBER = 3
+TASK_NUMBER = 5
 
 # Set to zero for demo
 Z_OFFSET = -15
 THETA1_OFFSET = 0
-INITIAL_THROW = [-1.6685552379769837, -1.9193503504336467, -1.2846851678902542, 0.056300943612720304]
-
+THROW_ANGLE = {
+    'RED': 0,
+    'BLUE': 0.3,
+    'GREEN': -0.3,
+    'YELLOW': 1.25
+    }
 
 DROP = 1980 #2000
 GRIP = 1370 #1500

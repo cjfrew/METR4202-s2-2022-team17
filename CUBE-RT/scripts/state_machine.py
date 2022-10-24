@@ -1,30 +1,19 @@
 #!/usr/bin/env python3
-### Standard imports ###
+
 import rospy as rp
 import smach as sm
 import numpy as np
 import modern_robotics as mr
 
-### Self developed libraries ###
-
 from constants import *
 from helpers import *
-
-### ROS packages ###
 
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
 from fiducial_msgs.msg import FiducialTransformArray
 
 class Celebrate(sm.State):
-    """ A class to represent a "celebration" motion with the arm... Code breaks without
-
-    Args:
-        sm (State): A representation of the state machine 
-    """
     def __init__(self):
-        """ initialises the state machine and the joints 
-        """
         sm.State.__init__(self, outcomes=['celebrated'])
         self.joints_pub = rp.Publisher('/desired_joint_states', JointState, queue_size=1)
 
@@ -53,11 +42,6 @@ class Celebrate(sm.State):
         return 'at_home'
 
 class GoHome(sm.State):
-    """A class to represent the "go home" state for the robotic arm
-
-    Args:
-        sm (state): A state in a stage machine
-    """
     def __init__(self):
         sm.State.__init__(self, outcomes=['at_home'])
         self.actual_joints = list()
@@ -65,11 +49,6 @@ class GoHome(sm.State):
         self.actual_joints_sub = rp.Subscriber('/joint_states', JointState, self.get_actual_joints)
 
     def get_actual_joints(self, joints: JointState):
-        """Function to get the current position of the joints
-
-        Args:
-            joints (JointState): the actual state of each joint 
-        """
         try:
             theta4, theta3, theta2, theta1 = joints.position
             self.actual_joints = [theta1,theta2,theta3,theta4]
@@ -100,23 +79,13 @@ class WaitCube(sm.State):
         self.actual_joints_sub = rp.Subscriber('/joint_states', JointState, self.get_actual_joints)
     
     def get_actual_joints(self, joints: JointState):
-        """Function to get the current position of the joints
-
-        Args:
-            joints (JointState): the actual state of each joint 
-        """
         try:
             theta4, theta3, theta2, theta1 = joints.position
             self.actual_joints = [theta1,theta2,theta3,theta4]
         except Exception as e:
             pass
 
-    def update_cubes(self, data: FiducialTransformArray): 
-        """Call back function for camera subscriber 
-
-        Args:
-            data (FiducialTransformArray): Holds transform data of the cubes (fiducial markers) from Camera
-        """
+    def update_cubes(self, data: FiducialTransformArray):
         self.cubes.clear()
         for transform in data.transforms:
             cubeID = transform.fiducial_id
@@ -125,51 +94,7 @@ class WaitCube(sm.State):
             rx,ry = cubPos_cam2rob(cx,cy)
             self.cubes[cubeID] = (rx,ry)
 
-    def check_if_moving(self):
-        """Checks whether the conveyer is active (moving)
-
-        Returns:
-            Boolean: If there are multiple cubes that are classified as "still" 
-        """
-        old_cubes = dict()
-        new_cubes = dict()
-        still_cubes = dict()
-        i = 1
-        while i <= 4:
-            # find max distance between a cubes old and current position
-            max_diff = 0
-            new_cubes = self.cubes.copy()
-            for cubeID in new_cubes:
-                if cubeID in old_cubes.keys():
-                    x_diff = np.abs(new_cubes[cubeID][0] - old_cubes[cubeID][0])
-                    y_diff = np.abs(new_cubes[cubeID][1] - old_cubes[cubeID][1])
-                    diff = np.sqrt(x_diff**2 + y_diff**2)
-                    if diff > max_diff:
-                        max_diff = diff
-            
-            # if the cubes positions are changing, they are moving and there is no still cubes
-            if max_diff < 0.5 and len(old_cubes)>0 and len(new_cubes)>0:
-                still_cubes = new_cubes.copy()
-
-            old_cubes = new_cubes.copy()
-            new_cubes.clear()
-
-            rp.sleep(0.3)
-            i=i+1
-
-        if len(still_cubes) < 1:
-            return True
-        else:
-            return False
-
     def catch_while_moving(self):
-        """ Determines the radius and rotation direction of each cube 
-
-        Returns:
-            pos_rot (Bool): 
-                True if rotating cw
-                False if rotating ccw 
-        """
         pos_rot = True
         old_cubes = self.cubes.copy()
         rp.sleep(0.5)
@@ -180,16 +105,12 @@ class WaitCube(sm.State):
             x, y = new_cubes[cubeID]
             x_cent, y_cent = rob2cent(x,y)
             self.rad_cubes[cubeID] = np.sqrt(x_cent**2 + y_cent**2)
-        
             if cubeID in old_cubes:
                 x_diff = np.abs(new_cubes[cubeID][0] - old_cubes[cubeID][0])
-        
             if x_diff > 2:
-                pos_rot = True
-        
-            elif x_diff < 2:
                 pos_rot = False
-        
+            elif x_diff < 2:
+                pos_rot = True
             else:
                 continue
 
@@ -198,23 +119,34 @@ class WaitCube(sm.State):
     def execute(self, ud):
         rp.loginfo('WaitCube')
 
-        moving = self.check_if_moving()
-        print(moving)
+        while len(self.cubes) < 1:
+            rp.sleep(0.2)
+    
+        pos_rot = self.catch_while_moving()
+        cubeID = furthest_of(self.cubes)
+        x_pos = self.rad_cubes[cubeID]
+        y_pos = np.sqrt(190**2 - x_pos**2) 
+        if pos_rot:
+            x, y = x_pos, y_pos
+        else:
+            x, y = -x_pos, y_pos
         
-        if moving and len(self.cubes) > 0:
+        print(x, y)
+        wait_angles = IKrob2(x, y, Z_OFFSET, np.pi/2)
+        print(wait_angles)
+        msg = JointState(name=JOINT_NAMES, position=wait_angles)
+        self.joints_pub.publish(msg)
+        while not at_joints(wait_angles, self.actual_joints):
+            rp.sleep(0.1)  
+
+        while self.cubes[cubeID][1] > 190:
+            rp.sleep(0.1)
         
-            pos_rot = self.catch_while_moving()
-            cubeID = furthest_of(self.cubes)
-            x_pos = self.cubes[cubeID][0]
-            y_pos = np.sqrt(190**2-x_pos**2) 
-        
-            if pos_rot:
-                x, y = x_pos, y_pos
-            else:
-                x, y = -x_pos, y_pos
+        rp.sleep(3)
+        shut_gripper_client(True)
+        return 'got_cube'
 
 class GoCube(sm.State):
-    
     def __init__(self):
         sm.State.__init__(self, outcomes=['at_cube'])
         # create dict of current cube
@@ -226,11 +158,6 @@ class GoCube(sm.State):
         self.actual_joints_sub = rp.Subscriber('/joint_states', JointState, self.get_actual_joints)
 
     def get_actual_joints(self, joints: JointState):
-        """Function to get the current position of the joints
-
-        Args:
-            joints (JointState): the actual state of each joint 
-        """
         try:
             theta4, theta3, theta2, theta1 = joints.position
             self.actual_joints = [theta1,theta2,theta3,theta4]
@@ -238,11 +165,6 @@ class GoCube(sm.State):
             pass
 
     def update_cubes(self, data: FiducialTransformArray):
-        """Call back function for camera subscriber 
-
-        Args:
-            data (FiducialTransformArray): Holds transform data of the cubes (fiducial markers) from Camera
-        """
         self.cubes.clear()
         for transform in data.transforms:
             cubeID = transform.fiducial_id
@@ -252,28 +174,19 @@ class GoCube(sm.State):
             self.cubes[cubeID] = (rx,ry)
 
     def wait_while_moving(self):
-        """ Itterates through all known cubes on platform and using the distance formula calculates which are stationary
-
-        Returns:
-            still_cubes (Dict): A dictionary containing all the cubes that are not moving 
-                according to the distance formula 
-        """
         old_cubes = dict()
         new_cubes = dict()
         still_cubes = dict()
 
         while len(still_cubes) < 1:
             # find max distance between a cubes old and current position
-            # Uses distance formula d = sqrt(dx^2 + dy^2)
             max_diff = 0
             new_cubes = self.cubes.copy()
-            
             for cubeID in new_cubes:
                 if cubeID in old_cubes.keys():
                     x_diff = np.abs(new_cubes[cubeID][0] - old_cubes[cubeID][0])
                     y_diff = np.abs(new_cubes[cubeID][1] - old_cubes[cubeID][1])
                     diff = np.sqrt(x_diff**2 + y_diff**2)
-            
                     if diff > max_diff:
                         max_diff = diff
             
@@ -308,7 +221,10 @@ class GoCube(sm.State):
             else:
                 still_cubes = self.wait_while_moving()
                 cubeID = best_of1(still_cubes)
-                x, y = self.cubes[cubeID]
+                try:
+                    x, y = self.cubes[cubeID]
+                except Exception as e:
+                    continue
 
             # make the loop a do while loop
             if np.sqrt(x**2 + y**2) > MAX_RANGE:
@@ -316,9 +232,7 @@ class GoCube(sm.State):
                 continue
             else:
                 break
-        
-        # Checks if distance is greater and our distance (from base)
-        # If true, reimplement IK algorithms to find new location
+
         if np.sqrt(x**2 + y**2) > 270:
             final_joint_angles = IKrob2(x ,y, Z_OFFSET, np.pi/2 + np.pi/6)
         else: 
@@ -329,18 +243,14 @@ class GoCube(sm.State):
         
         msg = JointState(name=JOINT_NAMES, position=pre_A_joint_angles)
         self.joints_pub.publish(msg)
-        
         while not at_joints(pre_A_joint_angles, self.actual_joints):
             rp.sleep(0.1)         
 
         if np.sqrt(x**2 + y**2) > CHANGE_GRIPPER_ANGLE+30 and np.sqrt(x**2 + y**2) < 270:
-        
             pre_grab = IKrob2(x-30*np.sin(final_joint_angles[0]), y-30*np.cos(final_joint_angles[0]), Z_OFFSET,np.pi/2)
             pre_grab[0] = final_joint_angles[0]
-        
             msg = JointState(name=JOINT_NAMES, position=pre_grab)
             self.joints_pub.publish(msg)
-        
             while not at_joints(pre_grab, self.actual_joints):
                 rp.sleep(0.1)
 
@@ -364,12 +274,6 @@ class GoColor(sm.State):
         self.actual_joints_sub = rp.Subscriber('/joint_states', JointState, self.get_actual_joints)
 
     def get_actual_joints(self, joints: JointState):
-        """Function to get the actual position of the joints
-
-        Args:
-            joints (JointState): the actual state of each joint 
-        """
-
         try:
             theta4, theta3, theta2, theta1 = joints.position
             self.actual_joints = [theta1,theta2,theta3,theta4]
@@ -396,28 +300,17 @@ class GoColor(sm.State):
         return 'at_color'
 
 class DropZone(sm.State):
-    """ A class denoting where the drop / baggage zones are for the blocks to be placed
-
-    Args:
-        sm (State): A representation of state from a state machine
-    """
     def __init__(self):
         sm.State.__init__(self, outcomes=['dropped'])
         self.same_color_tally = 0
         self.last_seen_color = 'NONE'
-        self.block_color = 'NONE' # [NONE RED BLUE GREEN YELLOW]
+        self.block_color = 'NONE' # NONE RED BLUE GREEN YELLOW
 
         self.joints_pub = rp.Publisher('/desired_joint_states', JointState, queue_size=1)
         self.color_sub = rp.Subscriber('/detected_color', String, self.update_color)
         self.actual_joints_sub = rp.Subscriber('/joint_states', JointState, self.get_actual_joints)
 
     def get_actual_joints(self, joints: JointState):
-        """Function to get the current position of the joints
-
-        Args:
-            joints (JointState): the actual state of each joint 
-        """
-
         try:
             theta4, theta3, theta2, theta1 = joints.position
             self.actual_joints = [theta1,theta2,theta3,theta4]
@@ -425,11 +318,6 @@ class DropZone(sm.State):
             pass
 
     def update_color(self, msg: String):
-        """ Checks the colour of the block s.t. the block can be positioned in the correct block
-
-        Args:
-            msg (String): the subscribed data of the colour detected through the camera
-        """
         self.last_seen_color = msg.data
         if self.last_seen_color == msg.data:
             self.same_color_tally += 1
@@ -450,9 +338,9 @@ class DropZone(sm.State):
             rp.sleep(0.1)
 
         if TASK_NUMBER == 5:
-            pre_throw = [0, np.pi/4, +np.pi/2, -np.pi/2]
-            release_throw = [0, np.pi/4, 0, 0]
-            post_throw = [0, np.pi/4, 0, 0]
+            pre_throw = [THROW_ANGLE[self.block_color], -np.pi/4, -np.pi/4, np.pi/4]
+            release_throw = [0, 0, 0, 0]
+            post_throw = [THROW_ANGLE[self.block_color], np.pi/4, np.pi/4, -np.pi/4]
 
             msg = JointState(name=JOINT_NAMES, position=pre_throw)
             self.joints_pub.publish(msg)
@@ -462,8 +350,7 @@ class DropZone(sm.State):
             msg = JointState(name=JOINT_NAMES, position=post_throw)
             self.joints_pub.publish(msg)
 
-            while release_throw[2] < self.actual_joints[2]:
-                rp.sleep(0.01)
+            rp.sleep(0.3)
             shut_gripper_client(False)
 
             while not at_joints(post_throw, self.actual_joints):
@@ -485,6 +372,7 @@ class DropZone(sm.State):
         return 'dropped'
 
 def main():
+    #rp.sleep(10)
     task_number = TASK_NUMBER
     
     if task_number == 1:
