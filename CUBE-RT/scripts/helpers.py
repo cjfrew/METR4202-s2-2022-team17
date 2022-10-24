@@ -29,48 +29,66 @@ def shut_gripper_client(grip: bool):
 def best_of1(cubes):
     best_cubeID = None
     min_dist = 999
+
     for cubeID in cubes:
         dist = distTo(cubes[cubeID])
+
         if dist < min_dist:
             min_dist = dist
             best_cubeID = cubeID
+
     return best_cubeID
 
 def furthest_of(cubes):
+
     furthest_cubeID = None
     max_dist = 0
+
     for cubeID in cubes:
         dist = distTo(cubes[cubeID])
+
         if dist > max_dist:
             max_dist = dist
             furthest_cubeID = cubeID
+
     return furthest_cubeID
 
 def best_of2(cubes):
+
     best_cubeID = 'None'
     min_dist = 999
+
     for cubeID in cubes:
         obstructed = obstructions(cubeID, cubes)
+
         if obstructed:
             continue
+
         dist = distTo(cubes[cubeID])
+
         if dist < min_dist:
             min_dist = dist
             best_cubeID = cubeID
+
     return best_cubeID
 
 def obstructions(cubeID1, cubes):
+
     obstructed = False
     position1 = cubes[cubeID1]
     x1, y1 = position1[0], position1[1]
+
     for cubeID2 in cubes:
         position2 = cubes[cubeID2]
         x2, y2 = position2[0], position2[1]
+
         if x1 == x2 and y1 == y2:
             continue
+
         if (np.sqrt((x1-x2)**2 + (y1-y2)**2) <= BLOCK_SIZE + OBSTRUCTION_ERROR) and (np.abs(x1-x2) > np.abs(y1-y2)):
             obstructed = True
             break
+
         else:
             obstructed = False
     
@@ -119,9 +137,13 @@ def IKrob(x_pos,y_pos,z_pos):
     theta1 = -np.arctan2(x,y)
     Pz = z - L1 + L5*np.sin(phi)
     Py = np.sqrt(x**2+y**2)-L5*np.cos(phi)
+
     if np.sqrt(Pz**2+Py**2)>mx_length1:
+
         ang = np.array([0,0,0,0])
+
     else:
+
         Wz = Pz-L4*np.cos(phi)
         Wy = Py-L4*np.sin(phi)
         c2 = (Wz**2+Wy**2-L2**2-L3**2)/(2*L2*L3)
@@ -132,19 +154,19 @@ def IKrob(x_pos,y_pos,z_pos):
             pass
 
         theta2 = np.arctan2(Wy,Wz)-np.arctan2((L3*np.sin(theta3)),(L2+L3*np.cos(theta3)))
-        if theta2<0:
+        if theta2 < 0:
             theta2 = theta2+np.pi
         theta4 = phi-theta2-theta3
             
-        if theta1>2.5:
+        if theta1 > 2.5:
             theta1 = 2.5
-        if theta1<-2.5:
+        if theta1 < -2.5:
             theta1 = -2.5
-        if theta2>2 or theta2<-2:
+        if theta2 > 2 or theta2 < -2:
             theta2 = 0
-        if theta3>2.5 or theta3<-2.5:
+        if theta3 > 2.5 or theta3 < -2.5:
             theta3 = 0
-        if theta4>1.8 or theta4<-1.8:
+        if theta4 > 1.8 or theta4 < -1.8:
             theta4 = 0
 
         ang = np.array([theta1 + THETA1_OFFSET,-theta2,-theta3,theta4])
@@ -192,19 +214,21 @@ def IKrob2(x_pos,y_pos,z_pos,phi):
             pass
 
         theta2 = np.arctan2(Wy,Wz)-np.arctan2((L3*np.sin(theta3)),(L2+L3*np.cos(theta3)))
-        if theta2<0:
+        
+        if theta2 < 0:
             theta2 = theta2+np.pi
+        
         theta4 = phi-theta2-theta3
             
-        if theta1>2.5:
+        if theta1 > 2.5:
             theta1 = 2.5
-        if theta1<-2.5:
+        if theta1 < -2.5:
             theta1 = -2.5
-        if theta2>2 or theta2<-2:
+        if theta2 > 2 or theta2 < -2:
             theta2 = 0
-        if theta3>2.5 or theta3<-2.5:
+        if theta3 > 2.5 or theta3 < -2.5:
             theta3 = 0
-        if theta4>1.8 or theta4<-1.8:
+        if theta4 > 1.8 or theta4 < -1.8:
             theta4 = 0
 
         ang = np.array([theta1 + THETA1_OFFSET,-theta2,-theta3,theta4])

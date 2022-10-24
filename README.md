@@ -36,14 +36,30 @@ To get this code you can either use [git](https://git-scm.com/downloads) to [clo
 
 The code is broken down such that the code database is modular; allowing for new functionality to be added and old functionality to be removed with (_*hopefully*_) no issues. This breakdown of general code can be seen below 
 
-REDO WITH WHAT SUBSCRIBES AND WHAT OUTPUTS
-
 The main set of code lies within the ```METR4202-s2-2022-team17/CUBE-RT/scripts``` folder. The following is a breakdown of the subscribers and publishers
 
+1. Dynamixel_interface 
+    1. Publishes position of servo motors
+2. METR4202_ximea_ros
+    1. Publishes
+        1. Camera positions
+        2. Transforms
+        3. Cube colour
+3. ```CUBE-RT/scripts```
+    1. Publishes
+        1. Desired_joint_states msg Joint_State
+    2. Subscribes
+        1. Camera transforms
+        2. Cube colour
+        3. Current_Joint_State 
+    3. Services
+        1. gripper_service (boolean service)
+
 ## Utilisation / Launching the Robot
+
 1. Run the terminal
 2. Enter into the *catkin_ws* workspace
 3. Run ``` sudo killall pigpiod \n sudo pigpiod``` to activate the servo
 4. Run ``` echo 0 \n sudo tee/sys/module/usbcore/parameters/usbfs_memory_mb``` to run the camera 
 5. Select the required test from constants.py by changing ```TASK_NUMBER```
-6. Run ``` roslaunch CUBE-RT DEMO.launch``` to run the testing system 
+6. Run ``` roslaunch CUBE-RT DEMO.launch``` to run the testing system
